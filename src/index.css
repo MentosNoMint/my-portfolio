@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+@font-face {
+    font-family: 'tt-medium';
+    src: url('/assets/fonts/TTNorms-Medium.otf') format('otf');
+    font-weight: normal;
+    font-style: normal;
+}
+}
