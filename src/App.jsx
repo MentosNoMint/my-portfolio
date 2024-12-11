@@ -5,7 +5,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<AlienModelRender />} />
+          <Route path='/' element={<AlienModelRender />} />
         </Routes>
       </Router>
     </>

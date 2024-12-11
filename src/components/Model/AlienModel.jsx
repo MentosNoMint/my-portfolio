@@ -5,7 +5,7 @@ Command: npx gltfjsx@6.5.3 alien.gltf --shadows
 
 /* eslint-disable */
 
-import React , { useEffect, useState, useRef , useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useGraph } from '@react-three/fiber';
 import { useGLTF, OrthographicCamera } from '@react-three/drei';
 import { SkeletonUtils } from 'three-stdlib';
@@ -18,11 +18,11 @@ export default function AlienModel(props) {
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes } = useGraph(clone);
   const meshGroupRef = useRef(null);
-  const groupRefs = useRef({})
-  const [meshCurrentPosition , setMeshCurrentPosition] = useState(props.mode.positionCube)
+  const groupRefs = useRef({});
+  const [meshCurrentPosition, setMeshCurrentPosition] = useState(props.mode.positionCube);
   const [arrayMesh, setArrayMesh] = useState([]);
-  const [isAnimated, setIsAnimated] = useState(false);
-  const [groupsCoordinates , setGroupsCoordinates] = useState(props.mode.groups);
+  const [isFinishedStartAnimate, setIsFinishedStartAnimimate] = useState(false);
+
   const {
     x: ears3X,
     y: ears3Y,
@@ -39,45 +39,21 @@ export default function AlienModel(props) {
     [props.item.eyes],
   );
 
-  const earsMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: props.item.ears.color }),
-    [props.item.ears],
-  );
-
   useEffect(() => {
-    const allMesh = meshGroupRef.current.children
-    .slice(3)
-    .flatMap((parent) =>
-      parent.children ? Array.from(parent.children) : [],
-    );
- 
-  setArrayMesh(allMesh);
-
-  const newColor = new THREE.Color(props.item.body);
-
-  Object.keys(nodes).forEach((key) => {
-    const node = nodes[key];
-    if (node.isMesh && node.material) {
-      node.material.color.set(newColor);
-    }
-  });
-  }, [nodes , props.item.body , props.mode])
+    const allMesh = props.mode.groups.flatMap((group) => groupRefs.current[group.id].children)
+    setArrayMesh(allMesh)
+    nodes.cube_344.material.color.set(props.item.body)
+  }, [props.mode, props.item.body])
 
   useGSAP(() => {
-    const positions = props.mode.positionCube.map(item => 
-      new THREE.Vector3(item.x, item.y, item.z)
-    );
-
-      arrayMesh.forEach((mesh , index) => {
-        const originalPosition = meshCurrentPosition[index];
-
-        if (!isAnimated) { 
+    arrayMesh.forEach((mesh, index) => {
+      const originalPosition = props.mode.positionCube[index]
+      if (!isFinishedStartAnimate) {
         const randomPosition = {
           x: mesh.position.x + Math.random() * 200 - 100,
           y: mesh.position.y + Math.random() * 150 - 75,
-          z: mesh.position.z + Math.random() * 200 - 100  
+          z: mesh.position.z + Math.random() * 200 - 100,
         }
-
         gsap.to(mesh.position, {
           x: randomPosition.x,
           y: randomPosition.y,
@@ -96,102 +72,177 @@ export default function AlienModel(props) {
           ease: 'power3.inOut'
         });
 
-        if (originalPosition) {
         gsap.to(mesh.position, {
-          x: originalPosition.x,
-          y: originalPosition.y,
-          z: originalPosition.z,
+          x: originalPosition?.x,
+          y: originalPosition?.y,
+          z: originalPosition?.z,
           duration: 2.2,
           ease: 'power2.inOut',
           delay: 4.5,
           onComplete: () => {
-            setIsAnimated(true);
+            setIsFinishedStartAnimimate(true);
           }
         });
-    }
       }
-      switch(props.mode.name) {
-        case 'cupCube':
-          gsap.to(mesh.position, {
-            x: originalPosition.x + Math.random() * 40 - 20,
-            y: originalPosition.y + Math.random() * 60 - 30,
-            z: originalPosition.z + Math.random() * 40 - 20,
-            duration: 0.5,
-            ease: 'power3.inOut',
-          });
-          gsap.to(mesh.position, {
-            x: originalPosition.x,
-            y: originalPosition.y,
-            z: originalPosition.z,
-            duration: 1.2,
-            delay: 1,
-            ease: 'power1.inOut',
-          });
-          setMeshCurrentPosition(positions);
-          break;
-          case 'alienCube':
-            gsap.to(mesh.position, {
-              x: originalPosition.x + Math.random() * 40 - 20,
-              y: originalPosition.y + Math.random() * 60 - 30,
-              z: originalPosition.z + Math.random() * 40 - 20,
-              duration: 0.5,
-              ease: 'power3.inOut',
-            });
-            gsap.to(mesh.position, {
-              x: originalPosition.x,
-              y: originalPosition.y,
-              z: originalPosition.z,
-              duration: 1.2,
-              delay: 1,
-              ease: 'power1.inOut',
-            });
-            setMeshCurrentPosition(positions);
-            break;
+      if (props.shouldAnimate) {
+        gsap.to(mesh.position, {
+          x: originalPosition?.x + Math.random() * 40 - 20,
+          y: originalPosition?.y + Math.random() * 35,
+          z: originalPosition?.z + Math.random() * 40 - 20,
+          duration: 0.5,
+          ease: 'power3.inOut',
+        })
+        gsap.to(mesh.position, {
+          x: originalPosition?.x,
+          y: originalPosition?.y,
+          z: originalPosition?.z,
+          duration: 1.2,
+          delay: 1,
+          ease: 'power1.inOut',
+        });
       }
+    })
+    const animateGroup = (group) => {
+      const ref = groupRefs.current[group.id];
+      gsap.to(ref.position, {
+        ...group.position,
+        duration: 1,
+        ease: 'power2.inOut',
       });
-  }, [arrayMesh, isAnimated , props.mode.positionCube]); 
+      gsap.to(ref.rotation, {
+        ...group.rotation,
+        duration: 1,
+        ease: 'power2.inOut',
+      });
+    };
+    if (['cupCube', 'alienCube'].includes(props.mode.name)) {
+      props.mode.groups.forEach(animateGroup);
+    }
+  }, [arrayMesh , props.mode.groups])
 
-  useGSAP(() => {
-          // ПРОДОЛЖЕНИЕ ДЛЯ GROUP 
-          if(props.mode.name === 'cupCube') {
-          props.mode.groups.forEach((group) => {
-            const ref = groupRefs.current[group.id]  
-            gsap.to(ref.position , {
-              x: group.position.x,
-              y: group.position.y,
-              z: group.position.z,
-              duration: 0.5,
-              ease: 'power2.inOut',
-            })
-            gsap.to(ref.rotation , {
-             x: group.rotation.x,
-             y: group.rotation.y,
-             z: group.rotation.z,
-             duration: 0.5,
-             ease: 'power2.inOut',
-           })
-           })
-          }
-          if(props.mode.name === 'alienCube') {
-            props.mode.groups.forEach((group) => {
-              const ref = groupRefs.current[group.id]  
-              gsap.to(ref.position , {
-                x: group.position.x,
-                y: group.position.y,
-                z: group.position.z,
-                duration: 0.5,
-                ease: 'power2.inOut',
-              })
-              gsap.to(ref.rotation , {
-               x: group.rotation.x,
-               y: group.rotation.y,
-               z: group.rotation.z,
-               duration: 0.5,
-               ease: 'power2.inOut',
-             })
-             })
-            }
-  },[props.mode.groups])
+  // useGSAP(() => {
+  //   const animateGroup = (group) => {
+  //     const ref = groupRefs.current[group.id];
+  //     gsap.to(ref.position, {
+  //       ...group.position,
+  //       duration: 0.5,
+  //       ease: 'power2.inOut',
+  //     });
+  //     gsap.to(ref.rotation, {
+  //       ...group.rotation,
+  //       duration: 0.5,
+  //       ease: 'power2.inOut',
+  //     });
+  //   };
+
+  //   if (['cupCube', 'alienCube'].includes(props.mode.name)) {
+  //     props.mode.groups.forEach(animateGroup);
+  //   }
+  // }, [props.mode.groups]);
+
+  // useEffect(() => {
+
+  //   const allMesh = meshGroupRef.current.children
+  //     .slice(3)
+  //     .flatMap((parent) =>
+  //       parent.children ? Array.from(parent.children) : [],
+  //     );
+
+  //   setArrayMesh(allMesh);
+
+  //   const newColor = new THREE.Color(props.item.body);
+
+  //   Object.keys(nodes).forEach((key) => {
+  //     const node = nodes[key];
+  //     if (node.isMesh && node.material) {
+  //       node.material.color.set(newColor);
+  //     }
+  //   });
+  // }, [nodes, props.item.body, props.mode ])
+
+  // useGSAP(() => {
+  //   arrayMesh.forEach((mesh, index) => {
+  //     const originalPosition = meshCurrentPosition[index];
+
+  //     if (!isFinishedStartAnim) {
+  //       const randomPosition = {
+  //         x: mesh.position.x + Math.random() * 200 - 100,
+  //         y: mesh.position.y + Math.random() * 150 - 75,
+  //         z: mesh.position.z + Math.random() * 200 - 100,
+  //       }
+
+  //       gsap.to(mesh.position, {
+  //         x: randomPosition.x,
+  //         y: randomPosition.y,
+  //         z: randomPosition.z,
+  //         duration: 1,
+  //         delay: 2,
+  //         ease: 'power4.inOut',
+  //       });
+
+  //       gsap.to(mesh.position, {
+  //         x: randomPosition.x + Math.random() * 200 - 100,
+  //         y: randomPosition.y + Math.random() * 150 - 75,
+  //         z: randomPosition.z + Math.random() * 200 - 100,
+  //         duration: 1.5,
+  //         delay: 3.2,
+  //         ease: 'power3.inOut'
+  //       });
+
+  //       if (originalPosition) {
+  //         gsap.to(mesh.position, {
+  //           x: originalPosition.x,
+  //           y: originalPosition.y,
+  //           z: originalPosition.z,
+  //           duration: 2.2,
+  //           ease: 'power2.inOut',
+  //           delay: 4.5,
+  //           onComplete: () => {
+  //             setIsFinishedStartAnim(true);
+  //           }
+  //         });
+  //       }
+  //     }
+  //     if (props.shouldAnimate) {
+  //       gsap.to(mesh.position, {
+  //         x: originalPosition.x + Math.random() * 40 - 20,
+  //         y: originalPosition.y + Math.random() * 35,
+  //         z: originalPosition.z + Math.random() * 40 - 20,
+  //         duration: 0.5,
+  //         ease: 'power3.inOut',
+  //       })
+  //     }
+  //     gsap.to(mesh.position, {
+  //       x: originalPosition.x,
+  //       y: originalPosition.y,
+  //       z: originalPosition.z,
+  //       duration: 1.2,
+  //       delay: 1,
+  //       ease: 'power1.inOut',
+  //     });
+  //   });
+  //   setMeshCurrentPosition(props.mode.positionCube);
+  // }, [arrayMesh, isFinishedStartAnim, props.mode.positionCube, props.shouldAnimate]);
+
+  // useGSAP(() => {
+  //   const animateGroup = (group) => {
+  //     const ref = groupRefs.current[group.id];
+  //     gsap.to(ref.position, {
+  //       ...group.position,
+  //       duration: 0.5,
+  //       ease: 'power2.inOut',
+  //     });
+  //     gsap.to(ref.rotation, {
+  //       ...group.rotation,
+  //       duration: 0.5,
+  //       ease: 'power2.inOut',
+  //     });
+  //   };
+
+  //   if (['cupCube', 'alienCube'].includes(props.mode.name)) {
+  //     props.mode.groups.forEach(animateGroup);
+  //   }
+  // }, [props.mode.groups , groupRefs.current]);
 
   return (
     <group {...props} dispose={null}>
@@ -200,13 +251,13 @@ export default function AlienModel(props) {
           <primitive object={nodes.Directional_Light.target} position={[0, 0, -1]} />
         </directionalLight>
         <OrthographicCamera makeDefault={false} far={100000} near={0} position={[0, 0, 1000]} />
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupOne').x,findGroupsPosition(groupsCoordinates, 'groupOne').y,findGroupsPosition(groupsCoordinates, 'groupOne').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupOne').x, findGroupsRotation(groupsCoordinates, 'groupOne').y,findGroupsRotation(groupsCoordinates, 'groupOne').z]} ref={(el) => (groupRefs.current['groupOne'] = el)}>
-          <mesh castShadow receiveShadow geometry={nodes.ears_1.geometry} material={nodes.ears_1.material} position={[ears1X, ears1Y, ears1Z]} name='ears_1'/>
-          <mesh castShadow receiveShadow geometry={nodes.ears_2.geometry} material={nodes.ears_2.material} position={[27.283, -4.536, 0]} name='ears_2'/>
-          <mesh castShadow receiveShadow geometry={nodes.ears_3.geometry} material={nodes.ears_3.material} position={[ears3X, ears3Y, ears3Z]} name='ears_3'/>
-          <mesh castShadow receiveShadow geometry={nodes.ears_4.geometry} material={nodes.ears_4.material} position={[-27.347, -4.536, 0]} name='ears_4'/>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupOne').x, findGroupsPosition(groupRefs.current, 'groupOne').y, findGroupsPosition(props.mode.groups, 'groupOne').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupOne').x, findGroupsRotation(props.mode.groups, 'groupOne').y, findGroupsRotation(props.mode.groups, 'groupOne').z]} ref={(el) => (groupRefs.current['groupOne'] = el)}>
+          <mesh castShadow receiveShadow geometry={nodes.ears_1.geometry} material={nodes.ears_1.material} position={[ears1X, ears1Y, ears1Z]} name='ears_1' />
+          <mesh castShadow receiveShadow geometry={nodes.ears_2.geometry} material={nodes.ears_2.material} position={[27.283, -4.536, 0]} name='ears_2' />
+          <mesh castShadow receiveShadow geometry={nodes.ears_3.geometry} material={nodes.ears_3.material} position={[ears3X, ears3Y, ears3Z]} name='ears_3' />
+          <mesh castShadow receiveShadow geometry={nodes.ears_4.geometry} material={nodes.ears_4.material} position={[-27.347, -4.536, 0]} name='ears_4' />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupTwo').x, findGroupsPosition(groupsCoordinates, 'groupTwo').y, findGroupsPosition(groupsCoordinates, 'groupTwo').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupTwo').x, findGroupsRotation(groupsCoordinates, 'groupTwo').y, findGroupsRotation(groupsCoordinates, 'groupTwo').z]} ref={(el) => (groupRefs.current['groupTwo'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupTwo').x, findGroupsPosition(groupRefs.current, 'groupTwo').y, findGroupsPosition(props.mode.groups, 'groupTwo').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupTwo').x, findGroupsRotation(props.mode.groups, 'groupTwo').y, findGroupsRotation(props.mode.groups, 'groupTwo').z]} ref={(el) => (groupRefs.current['groupTwo'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_344.geometry} material={nodes.cube_344.material} position={[18.252, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_345.geometry} material={nodes.cube_345.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_346.geometry} material={nodes.cube_346.material} position={[18.252, 36.52, 0]} />
@@ -239,7 +290,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_373.geometry} material={nodes.cube_373.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_374.geometry} material={nodes.cube_374.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupThree').x, findGroupsPosition(groupsCoordinates, 'groupThree').y, findGroupsPosition(groupsCoordinates, 'groupThree').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupThree').x, findGroupsRotation(groupsCoordinates, 'groupThree').y, findGroupsRotation(groupsCoordinates, 'groupThree').z]} ref={(el) => (groupRefs.current['groupThree'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupThree').x, findGroupsPosition(groupRefs.current, 'groupThree').y, findGroupsPosition(props.mode.groups, 'groupThree').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupThree').x, findGroupsRotation(props.mode.groups, 'groupThree').y, findGroupsRotation(props.mode.groups, 'groupThree').z]} ref={(el) => (groupRefs.current['groupThree'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_294.geometry} material={nodes.cube_294.material} position={[18.252, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_295.geometry} material={nodes.cube_295.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_296.geometry} material={nodes.cube_296.material} position={[18.252, 36.52, 0]} />
@@ -291,7 +342,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_342.geometry} material={nodes.cube_342.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_343.geometry} material={nodes.cube_343.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupFour').x, findGroupsPosition(groupsCoordinates, 'groupFour').y, findGroupsPosition(groupsCoordinates, 'groupFour').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupFour').x, findGroupsRotation(groupsCoordinates, 'groupFour').y, findGroupsRotation(groupsCoordinates, 'groupFour').z]} ref={(el) => (groupRefs.current['groupFour'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupFour').x, findGroupsPosition(groupRefs.current, 'groupFour').y, findGroupsPosition(props.mode.groups, 'groupFour').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupFour').x, findGroupsRotation(props.mode.groups, 'groupFour').y, findGroupsRotation(props.mode.groups, 'groupFour').z]} ref={(el) => (groupRefs.current['groupFour'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_224.geometry} material={nodes.cube_224.material} position={[18.252, -9.13, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_225.geometry} material={nodes.cube_225.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_226.geometry} material={nodes.cube_226.material} position={[18.252, 36.52, 0]} />
@@ -364,7 +415,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_292.geometry} material={nodes.cube_292.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_293.geometry} material={nodes.cube_293.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupFive').x, findGroupsPosition(groupsCoordinates, 'groupFive').y, findGroupsPosition(groupsCoordinates, 'groupFive').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupFive').x, findGroupsRotation(groupsCoordinates, 'groupFive').y, findGroupsRotation(groupsCoordinates, 'groupFive').z]} ref={(el) => (groupRefs.current['groupFive'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupFive').x, findGroupsPosition(groupRefs.current, 'groupFive').y, findGroupsPosition(props.mode.groups, 'groupFive').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupFive').x, findGroupsRotation(props.mode.groups, 'groupFive').y, findGroupsRotation(props.mode.groups, 'groupFive').z]} ref={(el) => (groupRefs.current['groupFive'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_153.geometry} material={nodes.cube_153.material} position={[18.252, -9.13, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_154.geometry} material={nodes.cube_154.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_155.geometry} material={nodes.cube_155.material} position={[18.252, 36.52, 0]} />
@@ -437,7 +488,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_222.geometry} material={nodes.cube_222.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_223.geometry} material={nodes.cube_223.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupSix').x, findGroupsPosition(groupsCoordinates, 'groupSix').y, findGroupsPosition(groupsCoordinates, 'groupSix').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupSix').x, findGroupsRotation(groupsCoordinates, 'groupSix').y, findGroupsRotation(groupsCoordinates, 'groupSix').z]} ref={(el) => (groupRefs.current['groupSix'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupSix').x, findGroupsPosition(groupRefs.current, 'groupSix').y, findGroupsPosition(props.mode.groups, 'groupSix').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupSix').x, findGroupsRotation(props.mode.groups, 'groupSix').y, findGroupsRotation(props.mode.groups, 'groupSix').z]} ref={(el) => (groupRefs.current['groupSix'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_82.geometry} material={nodes.cube_82.material} position={[18.252, -9.13, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_83.geometry} material={nodes.cube_83.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_84.geometry} material={nodes.cube_84.material} position={[18.252, 36.52, 0]} />
@@ -510,7 +561,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_151.geometry} material={nodes.cube_151.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_152.geometry} material={nodes.cube_152.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupSeven').x, findGroupsPosition(groupsCoordinates, 'groupSeven').y, findGroupsPosition(groupsCoordinates, 'groupSeven').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupSeven').x, findGroupsRotation(groupsCoordinates, 'groupSeven').y, findGroupsRotation(groupsCoordinates, 'groupSeven').z]} ref={(el) => (groupRefs.current['groupSeven'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupSeven').x, findGroupsPosition(groupRefs.current, 'groupSeven').y, findGroupsPosition(props.mode.groups, 'groupSeven').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupSeven').x, findGroupsRotation(props.mode.groups, 'groupSeven').y, findGroupsRotation(props.mode.groups, 'groupSeven').z]} ref={(el) => (groupRefs.current['groupSeven'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_32.geometry} material={nodes.cube_32.material} position={[18.252, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_33.geometry} material={nodes.cube_33.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_34.geometry} material={nodes.cube_34.material} position={[18.252, 36.52, 0]} />
@@ -562,7 +613,7 @@ export default function AlienModel(props) {
           <mesh castShadow receiveShadow geometry={nodes.cube_80.geometry} material={nodes.cube_80.material} position={[-18.252, 0, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_81.geometry} material={nodes.cube_81.material} position={[-18.252, -9.125, 0]} />
         </group>
-        <group position={[findGroupsPosition(groupsCoordinates, 'groupEight').x, findGroupsPosition(groupsCoordinates, 'groupEight').y, findGroupsPosition(groupsCoordinates, 'groupEight').z]} rotation={[findGroupsRotation(groupsCoordinates, 'groupEight').x, findGroupsRotation(groupsCoordinates, 'groupEight').y, findGroupsRotation(groupsCoordinates, 'groupEight').z]} ref={(el) => (groupRefs.current['groupEight'] = el)}>
+        <group position={[findGroupsPosition(groupRefs.current, 'groupEight').x, findGroupsPosition(groupRefs.current, 'groupEight').y, findGroupsPosition(props.mode.groups, 'groupEight').z]} rotation={[findGroupsRotation(props.mode.groups, 'groupEight').x, findGroupsRotation(props.mode.groups, 'groupEight').y, findGroupsRotation(props.mode.groups, 'groupEight').z]} ref={(el) => (groupRefs.current['groupEight'] = el)}>
           <mesh castShadow receiveShadow geometry={nodes.cube_1.geometry} material={nodes.cube_1.material} position={[18.252, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_2.geometry} material={nodes.cube_2.material} position={[-0.002, -9.125, 0]} />
           <mesh castShadow receiveShadow geometry={nodes.cube_3.geometry} material={nodes.cube_3.material} position={[18.252, 36.52, 0]} />
