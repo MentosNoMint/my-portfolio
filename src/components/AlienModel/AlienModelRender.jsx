@@ -5,11 +5,13 @@ import { useRef, useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { modelScheme } from '../../constants';
 import PreLoader from '../PreLoader';
+import { alienCubePosition, cubCubePosition , defaultPosition } from '../../constants';
 
 const AlienModelRender = () => {
   const alienModelRef = useRef(null);
   const [currentModelScheme, setCurrentModelScheme] = useState(0);
   const [isAnimation, setIsAnimation] = useState(false);
+  const [selectMode, setSelectmode] = useState(defaultPosition);
 
   const handleClick = () => {
     if (!isAnimation) {
@@ -34,6 +36,18 @@ const AlienModelRender = () => {
   return (
     <>
       <PreLoader />
+      <button
+        className='fixed text-white z-50'
+        onClick={() => setSelectmode(cubCubePosition)}
+      >
+        Достижения
+      </button>
+      <button
+        className='fixed text-white z-50 ml-[100px]'
+        onClick={() => setSelectmode(alienCubePosition)}
+      >
+        Назад
+      </button>
       <div
         className='w-full h-screen bg-black flex justify-center items-center'
         onClick={handleClick}
@@ -41,6 +55,7 @@ const AlienModelRender = () => {
         <AlienModelView
           item={modelScheme[currentModelScheme]}
           modelRef={alienModelRef}
+          mode={selectMode}
         />
 
         <Canvas shadows eventSource={document.getElementById('root')}>
