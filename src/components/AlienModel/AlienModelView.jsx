@@ -25,7 +25,7 @@ const AlienModelView = ({ item, modelRef, mode, shouldAnimate }) => {
       <group position={[0, 0, 0]} ref={modelRef}>
         <Suspense fallback={<Loader />}>
           {/* <AlienDefault scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
-          {/* <Alien scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
+          <Alien scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} />
           {/* <Cup
             scale={[2, 2, 2]}
             // rotation={[0.3, 0.2, 0]}

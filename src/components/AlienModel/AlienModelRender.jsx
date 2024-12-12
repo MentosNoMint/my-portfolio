@@ -16,7 +16,7 @@ const AlienModelRender = () => {
   const [currentModelScheme, setCurrentModelScheme] = useState(0);
   const [isAnimation, setIsAnimation] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
-  const [selectMode, setSelectmode] = useState(cubCubePosition);
+  const [selectMode, setSelectmode] = useState(alienCubePosition);
 
   const handleStateClick = (mode) => {
     setSelectmode(mode);

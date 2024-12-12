@@ -17,6 +17,7 @@ export default function Model(props) {
   useEffect(() => {
    meshGroupRef.current.children.forEach((item) => console.log(item.position))
     // allMesh.forEach((item) => console.log(item.position))
+    // console.log(meshGroupRef.current.children)
   }, [props.item.body, props.mode ])
 
   return (

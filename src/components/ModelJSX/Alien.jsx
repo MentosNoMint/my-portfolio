@@ -69,7 +69,7 @@ export default function Alien(props) {
       if (props.shouldAnimate) {
         gsap.to(mesh.position, {
           x: originalPosition.x + Math.random() * 40 - 20,
-          y: originalPosition.y + Math.random() * 15,
+          y: originalPosition.y + Math.random() * 25,
           z: originalPosition.z + Math.random() * 40 - 20,
           duration: 0.5,
           ease: 'power3.inOut',
@@ -79,8 +79,8 @@ export default function Alien(props) {
           y: originalPosition.y,
           z: originalPosition.z,
           duration: 1.2,
-          delay: 1,
-          ease: 'power1.inOut',
+          delay: 0.6,
+          ease: 'power3.inOut',
         });
       }
     })
