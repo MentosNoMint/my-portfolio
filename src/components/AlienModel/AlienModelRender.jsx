@@ -8,7 +8,7 @@ import PreLoader from '../PreLoader';
 import {
   alienCubePosition,
   cubCubePosition,
-  defaultPosition,
+  rubikCubePosition,
 } from '../../constants';
 
 const AlienModelRender = () => {
@@ -47,6 +47,12 @@ const AlienModelRender = () => {
   return (
     <>
       <PreLoader />
+      <button
+        className='fixed text-white z-50 ml-[200px]'
+        onClick={() => handleStateClick(rubikCubePosition)}
+      >
+        Анимации
+      </button>
       <button
         className='fixed text-white z-50'
         onClick={() => handleStateClick(cubCubePosition)}

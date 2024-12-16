@@ -5,12 +5,13 @@ Command: npx gltfjsx@6.5.3 alien.gltf --shadows
 
 /* eslint-disable */
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { useGraph } from '@react-three/fiber'
 import { useGLTF, OrthographicCamera } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
+import * as THREE from 'three'
 
 export default function Alien(props) {
   const { scene } = useGLTF('/assets/model/alien.gltf')
@@ -19,17 +20,38 @@ export default function Alien(props) {
   const meshGroupRef = useRef()
   const [allMesh, setAllMesh] = useState([])
   const [isFinishedStartAnimate, setIsFinishedStartAnimimate] = useState(false)
+  const {
+    x: ears3X,
+    y: ears3Y,
+    z: ears3Z,
+  } = props.item.ears.position['ears_3'];
+  const {
+    x: ears1X,
+    y: ears1Y,
+    z: ears1Z,
+  } = props.item.ears.position['ears_1'];
+
+
+  const eyesMaterial = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: props.item.eyes }),
+    [props.item.eyes],
+  );
 
   useEffect(() => {
     nodes.cube_344.material.color.set(props.item.body)
     setAllMesh(meshGroupRef.current.children.slice(3))
-    console.log(props.mode)
   }, [props.item.body, props.mode])
 
   useGSAP(() => {
     allMesh.forEach((mesh, index) => {
       const originalPosition = props.mode.positionCube[index]
       if (!isFinishedStartAnimate) {
+        
+        gsap.set(mesh.position, {
+          x: 0,
+          y: 0,
+          z: 0,
+        })
 
         const randomPosition = {
           x: mesh.position.x + Math.random() * 200 - 100,
@@ -55,9 +77,9 @@ export default function Alien(props) {
         });
 
         gsap.to(mesh.position, {
-          x: originalPosition.x,
-          y: originalPosition.y,
-          z: originalPosition.z,
+          x: originalPosition?.x,
+          y: originalPosition?.y,
+          z: originalPosition?.z,
           duration: 2.2,
           ease: 'power2.inOut',
           delay: 4.5,
@@ -68,16 +90,16 @@ export default function Alien(props) {
       }
       if (props.shouldAnimate) {
         gsap.to(mesh.position, {
-          x: originalPosition.x + Math.random() * 40 - 20,
-          y: originalPosition.y + Math.random() * 25,
-          z: originalPosition.z + Math.random() * 40 - 20,
+          x: originalPosition?.x + Math.random() * 40 - 20,
+          y: originalPosition?.y + Math.random() * 25,
+          z: originalPosition?.z + Math.random() * 40 - 20,
           duration: 0.5,
           ease: 'power3.inOut',
         })
         gsap.to(mesh.position, {
-          x: originalPosition.x,
-          y: originalPosition.y,
-          z: originalPosition.z,
+          x: originalPosition?.x,
+          y: originalPosition?.y,
+          z: originalPosition?.z,
           duration: 1.2,
           delay: 0.6,
           ease: 'power3.inOut',
@@ -93,9 +115,9 @@ export default function Alien(props) {
           <primitive object={nodes.Directional_Light.target} position={[0, 0, -1]} />
         </directionalLight>
         <OrthographicCamera makeDefault={false} far={100000} near={0} position={[-14.418, 177.764, 1035.875]} rotation={[-0.177, 0.001, 0]} />
-        <mesh castShadow receiveShadow geometry={nodes.ears_1.geometry} material={nodes.ears_1.material} position={[36.32, 45.368, 0]} />
+        <mesh castShadow receiveShadow geometry={nodes.ears_1.geometry} material={nodes.ears_1.material} position={[ears1X , ears1Y, ears1Z]} />
         <mesh castShadow receiveShadow geometry={nodes.ears_2.geometry} material={nodes.ears_2.material} position={[27.318, 36.546, 0]} />
-        <mesh castShadow receiveShadow geometry={nodes.ears_3.geometry} material={nodes.ears_3.material} position={[-36.245, 45.497, 0]} />
+        <mesh castShadow receiveShadow geometry={nodes.ears_3.geometry} material={nodes.ears_3.material} position={[ears3X , ears3Y, ears3Z]} />
         <mesh castShadow receiveShadow geometry={nodes.ears_4.geometry} material={nodes.ears_4.material} position={[-27.313, 36.546, 0]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_344.geometry} material={nodes.cube_344.material} position={[18.252, -45.618, -27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_345.geometry} material={nodes.cube_345.material} position={[-0.002, -45.618, -27.39]} />
@@ -431,12 +453,12 @@ export default function Alien(props) {
         <mesh castShadow receiveShadow geometry={nodes.cube_63.geometry} material={nodes.cube_63.material} position={[18.25, 18.292, 18.26]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_64.geometry} material={nodes.cube_64.material} position={[18.25, 9.162, 18.26]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_65.geometry} material={nodes.cube_65.material} position={[27.37, 9.162, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_7.geometry} material={nodes.eye_7.material} position={[-27.37, 0.027, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_8.geometry} material={nodes.eye_8.material} position={[-27.37, -9.098, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_9.geometry} material={nodes.eye_9.material} position={[-27.37, -18.228, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_10.geometry} material={nodes.eye_10.material} position={[27.37, 0.027, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_11.geometry} material={nodes.eye_11.material} position={[27.37, -9.098, 18.26]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_12.geometry} material={nodes.eye_12.material} position={[27.37, -18.228, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_7.geometry} material={eyesMaterial} position={[-27.37, 0.027, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_8.geometry} material={eyesMaterial} position={[-27.37, -9.098, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_9.geometry} material={eyesMaterial} position={[-27.37, -18.228, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_10.geometry} material={eyesMaterial} position={[27.37, 0.027, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_11.geometry} material={eyesMaterial} position={[27.37, -9.098, 18.26]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_12.geometry} material={eyesMaterial} position={[27.37, -18.228, 18.26]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_72.geometry} material={nodes.cube_72.material} position={[-27.37, -27.358, 18.26]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_73.geometry} material={nodes.cube_73.material} position={[-27.37, -36.488, 18.26]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_74.geometry} material={nodes.cube_74.material} position={[27.37, -27.358, 18.26]} />
@@ -451,16 +473,16 @@ export default function Alien(props) {
         <mesh castShadow receiveShadow geometry={nodes.cube_4.geometry} material={nodes.cube_4.material} position={[9.123, 9.157, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_5.geometry} material={nodes.cube_5.material} position={[-0.002, 9.157, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_6.geometry} material={nodes.cube_6.material} position={[-9.127, 9.157, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_6.geometry} material={nodes.eye_6.material} position={[18.252, -9.103, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_6.geometry} material={eyesMaterial} position={[18.252, -9.103, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_12.geometry} material={nodes.cube_12.material} position={[9.123, -9.103, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_13.geometry} material={nodes.cube_13.material} position={[-0.002, -9.103, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_14.geometry} material={nodes.cube_14.material} position={[-9.127, -9.103, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_1.geometry} material={nodes.eye_1.material} position={[-18.252, -9.103, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_5.geometry} material={nodes.eye_5.material} position={[18.252, -18.233, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_4.geometry} material={nodes.eye_4.material} position={[9.123, -18.233, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_1.geometry} material={eyesMaterial} position={[-18.252, -9.103, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_5.geometry} material={eyesMaterial} position={[18.252, -18.233, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_4.geometry} material={eyesMaterial} position={[9.123, -18.233, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_18.geometry} material={nodes.cube_18.material} position={[-0.002, -18.233, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_3.geometry} material={nodes.eye_3.material} position={[-9.127, -18.233, 27.39]} />
-        <mesh castShadow receiveShadow geometry={nodes.eye_2.geometry} material={nodes.eye_2.material} position={[-18.252, -18.233, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_3.geometry} material={eyesMaterial} position={[-9.127, -18.233, 27.39]} />
+        <mesh castShadow receiveShadow geometry={nodes.eye_2.geometry} material={eyesMaterial} position={[-18.252, -18.233, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_21.geometry} material={nodes.cube_21.material} position={[18.252, -27.368, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_22.geometry} material={nodes.cube_22.material} position={[9.123, -27.368, 27.39]} />
         <mesh castShadow receiveShadow geometry={nodes.cube_23.geometry} material={nodes.cube_23.material} position={[-0.002, -27.368, 27.39]} />

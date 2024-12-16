@@ -4,6 +4,7 @@ import Loader from '../Loader.jsx';
 import Cup from '../Model/Cub.jsx';
 import Alien from '../ModelJSX/Alien.jsx';
 import Model from '../ModelJSX/Cup';
+import Rubik from '../ModelJSX/Rubik.jsx';
 
 const AlienModelView = ({ item, modelRef, mode, shouldAnimate }) => {
   return (
@@ -26,6 +27,7 @@ const AlienModelView = ({ item, modelRef, mode, shouldAnimate }) => {
         <Suspense fallback={<Loader />}>
           {/* <AlienDefault scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
           <Alien scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} />
+          {/* <Rubik scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
           {/* <Cup
             scale={[2, 2, 2]}
             // rotation={[0.3, 0.2, 0]}
