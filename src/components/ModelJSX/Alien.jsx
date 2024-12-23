@@ -62,27 +62,27 @@ export default function Alien(props) {
           x: randomPosition.x,
           y: randomPosition.y,
           z: randomPosition.z,
-          duration: 1,
+          duration: 0.8,
           delay: 2,
-          ease: 'power4.inOut',
+          ease: 'power4.out',
         });
 
-        gsap.to(mesh.position, {
-          x: randomPosition.x + Math.random() * 200 - 100,
-          y: randomPosition.y + Math.random() * 150 - 75,
-          z: randomPosition.z + Math.random() * 200 - 100,
-          duration: 1.5,
-          delay: 3.2,
-          ease: 'power3.inOut'
-        });
+        // gsap.to(mesh.position, {
+        //   x: randomPosition.x + Math.random() * 200 - 100,
+        //   y: randomPosition.y + Math.random() * 150 - 75,
+        //   z: randomPosition.z + Math.random() * 200 - 100,
+        //   duration: 1,
+        //   delay: 2.5,
+        //   ease: 'power3.inOut'
+        // });
 
         gsap.to(mesh.position, {
           x: originalPosition?.x,
           y: originalPosition?.y,
           z: originalPosition?.z,
-          duration: 2.2,
+          duration: 1.7,
           ease: 'power2.inOut',
-          delay: 4.5,
+          delay: 3,
           onComplete: () => {
             setIsFinishedStartAnimimate(true);
           }
@@ -109,7 +109,7 @@ export default function Alien(props) {
   }, [allMesh , props.mode])
 
   return (
-    <group {...props} dispose={null}>
+    <group {...props} dispose={null} position={[0, 0, 0]}>
       <group scale={0.01} ref={meshGroupRef}>
         <directionalLight intensity={1} decay={2} rotation={[0, 0.48, 0]} target={nodes.Directional_Light.target}>
           <primitive object={nodes.Directional_Light.target} position={[0, 0, -1]} />

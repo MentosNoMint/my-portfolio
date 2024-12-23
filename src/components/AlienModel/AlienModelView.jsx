@@ -1,15 +1,25 @@
 import { OrbitControls, PerspectiveCamera, View } from '@react-three/drei';
-import { Suspense } from 'react';
+import { Suspense, useRef } from 'react';
 import Loader from '../Loader.jsx';
-import Cup from '../Model/Cub.jsx';
 import Alien from '../ModelJSX/Alien.jsx';
-import Model from '../ModelJSX/Cup';
-import Rubik from '../ModelJSX/Rubik.jsx';
+import React, { useState, useEffect } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 
 const AlienModelView = ({ item, modelRef, mode, shouldAnimate }) => {
+  const lightRef = useRef();
+
+  useGSAP(() => {
+    gsap.to(lightRef.current, {
+      intensity: mode.name !== 'alienCube' ? 5 : 0,
+      duration: 1,
+      delay: 0.2,
+    })
+  },[mode.name])
+
   return (
     <View className='w-full h-full absolute'>
-      <PerspectiveCamera makeDefault position={[0, 0, 4]} />
+      <PerspectiveCamera makeDefault position={[0, -0.2, 4.1]} />
       {/* Добавляем DirectionalLight */}
       <directionalLight
         position={[2, 10, 5]}
@@ -23,17 +33,21 @@ const AlienModelView = ({ item, modelRef, mode, shouldAnimate }) => {
         color='white'
         castShadow
       />
-      <group position={[0, 0, 0]} ref={modelRef}>
+      <directionalLight
+        position={[0, -2, 15]}
+        intensity={0} // Интенсивность света
+        color='white'
+        castShadow
+        ref={lightRef}
+      />
+      <group ref={modelRef} position={[0, 0, 0]}>
         <Suspense fallback={<Loader />}>
-          {/* <AlienDefault scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
-          <Alien scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} />
-          {/* <Rubik scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate} /> */}
-          {/* <Cup
+          <Alien
             scale={[2, 2, 2]}
-            // rotation={[0.3, 0.2, 0]}
-            // position={[0, -0.4, 0]}
-          /> */}
-          {/* <Model scale={[2, 2, 2]} item={item} mode={mode} shouldAnimate={shouldAnimate}/> */}
+            item={item}
+            mode={mode}
+            shouldAnimate={shouldAnimate}
+          />
         </Suspense>
       </group>
     </View>

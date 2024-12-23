@@ -5,9 +5,21 @@
 
 @layer base {
 @font-face {
-    font-family: 'tt-medium';
-    src: url('/assets/fonts/TTNorms-Medium.otf') format('otf');
-    font-weight: normal;
-    font-style: normal;
+    font-family: 'namu-medium';
+    src: url('/assets/fonts/NAMU-Pro.ttf') format('truetype');
 }
+}
+
+@layer components {
+    .div-animation {
+        transform: translateY(140px);
+        transition: trasform 0.5s;
+    }
+    .header-animation {
+        transform: translateY(-140px);
+        transition: trasform 0.5s;
+    }
+    .animation-limit {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    }
 }

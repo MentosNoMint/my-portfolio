@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        medium: ['tt-medium', 'sans-serif'],
+        custom: ['namu-medium', 'sans-serif'],
       },
     },
   },
